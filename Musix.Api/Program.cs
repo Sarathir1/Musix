@@ -22,21 +22,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();    
 }
 
-using (var scope = app.Services.CreateScope())
-{
-    using (var appContext = scope.ServiceProvider.GetRequiredService<MusixDbContext>())
-    {
-        try
-        {
-           await appContext.Database.MigrateAsync();
-        }
-        catch (Exception ex)
-        {
-            //Log errors or do anything you think it's needed
-            throw;
-        }
-    }
-}
+app.MigrateDatabase();
+
+app.MapGet("/healthcheck", async req => {
+    await req.Response.WriteAsync("healthy");
+});
 
 app.UseHttpsRedirection();
 
@@ -45,3 +35,27 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+public static class Bootup
+{
+    public static WebApplication MigrateDatabase(this WebApplication webApp)
+    {
+        using (var scope = webApp.Services.CreateScope())
+        {
+            using (var appContext = scope.ServiceProvider.GetRequiredService<MusixDbContext>())
+            {
+                try
+                {
+                    appContext.Database.MigrateAsync();
+                }
+                catch (Exception ex)
+                {
+                    //Log errors or do anything you think it's needed
+                    throw;
+                }
+            }
+        }
+        return webApp;
+    }
+}
