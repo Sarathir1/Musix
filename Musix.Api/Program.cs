@@ -22,7 +22,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();    
 }
 
-app.MigrateDatabase();
+//app.MigrateDatabase();
 
 app.MapGet("/healthcheck", async req => {
     await req.Response.WriteAsync("healthy");
